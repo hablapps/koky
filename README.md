@@ -1,3 +1,3 @@
 # Koky
 
-Library for functional programming proofs.
+Typeclasses, datatypes and theorems for functional programming in Coq.
