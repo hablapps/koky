@@ -1,0 +1,7 @@
+-R . Gallo
+Core/Functor.v
+Core/Monad.v
+Core/MonadState.v
+Core/Id.v
+Core/indexedStateT.v
+Core/Std/prod.v

@@ -1,4 +1,3 @@
-Require Import Functor.
 Require Import Monad.
 
 Definition Id (A : Type) : Type := A.

@@ -1,5 +1,5 @@
 Require Import Program.Basics.
-Require Import Gallo.Core.Functor.
+Require Import Functor.
 
 Class Monad m `{FunctorDec m} : Type :=
 { ret  : forall {X}, X -> m X
