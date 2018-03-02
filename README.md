@@ -1,2 +1,3 @@
-# gallo
-Typeclasses and data structures in Coq
+# Koky
+
+Typeclasses and data structures in Coq.
