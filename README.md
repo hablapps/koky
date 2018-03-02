@@ -1,3 +1,3 @@
 # Koky
 
-Typeclasses and data structures in Coq.
+Library for functional programming proofs.
