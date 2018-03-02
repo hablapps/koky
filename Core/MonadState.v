@@ -1,5 +1,7 @@
 Require Import Program.Basics.
 Require Import Monad.
+Require Export Functor.
+Require Export Monad.
 
 Open Scope program_scope.
 
