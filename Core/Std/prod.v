@@ -1,4 +1,4 @@
-Require Import FunctionalExtensionality.
+Require Import Koky.Core.Util.FunExt.
 Require Import Functor.
 
 Instance Functor_prod {A} : Functor (prod A) :=

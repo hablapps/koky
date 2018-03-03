@@ -1,7 +1,7 @@
-Require Import FunctionalExtensionality.
 Require Import MonadState.
 Require Import Id.
 Require Import Std.prod.
+Require Import Util.FunExt.
 
 (* datatype and definitions *)
 
@@ -49,24 +49,14 @@ Qed.
 
 Instance Monad_stateT {S m} `{Monad m} : Monad (stateT S m) :=
 { ret _ x := mkIndexedStateT (fun s => ret (x, s))
-; bind _ _ sa f := mkIndexedStateT (fun s => 
+; bind _ _ sa f := mkIndexedStateT (fun s =>
     runIndexedStateT sa s >>= (fun p => runIndexedStateT (f (fst p)) (snd p)))
 }.
-
-Theorem functional_extensionality_with :
-  forall {S T} {f g : S -> T}, 
-    (forall s, f s = g s) -> (fun s => f s) = (fun s => g s).
-Proof.
-  intros.
-  apply functional_extensionality.
-  intros.
-  now rewrite H.
-Qed.
 
 Instance MonadDec_stateT {S m} `{MonadDec m} : MonadDec (stateT S m).
 Proof.
   destruct H0.
-  unfold Basics.compose in functor_comp.
+  unfold Basics.compose in *.
   destruct H2.
   split; intros; simpl.
 
@@ -75,10 +65,20 @@ Proof.
     simpl.
     repeat indexedStateT_reason.
 
-  - admit.
+  - destruct ma.
+    apply f_equal.
+    apply functional_extensionality.
+    intros.
+    assert (G : forall X Y (p : X * Y), @ret _ _ _ H1 _ (fst p, snd p) =
+                                        @ret _ _ _ H1 _ p).
+    { intros. apply f_equal. now rewrite prod_proj. }
+    rewrite (functional_extensionality_with (fun p => G _ _ p)).
+    now rewrite right_id.
 
-  - admit.
+  - repeat indexedStateT_reason.
 
-  - admit.
-
-Admitted.
+  - apply f_equal.
+    apply functional_extensionality.
+    intros.
+    now rewrite functor_rel.
+Qed.
