@@ -82,3 +82,20 @@ Proof.
     intros.
     now rewrite functor_rel.
 Qed.
+
+Instance MonadState_stateT {S m} `{MonadDec m} : MonadState S (stateT S m) :=
+{ get := mkIndexedStateT (fun s => ret (s, s))
+; put s' := mkIndexedStateT (fun _ => ret (tt, s'))
+}.
+
+Instance MonadStateDec_stateT {S m} `{MonadDec m} : MonadStateDec S (stateT S m).
+Proof.
+  destruct H2.
+  split;
+    intros;
+    simpl;
+    apply f_equal;
+    apply functional_extensionality;
+    intros;
+    now repeat rewrite left_id.
+Qed.

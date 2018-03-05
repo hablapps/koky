@@ -11,7 +11,7 @@ Class MonadState (A : Type) (m : Type -> Type) `{MonadDec m} :=
 ; modify : (A -> A) -> m unit := fun f => get >>= (put ∘ f)
 }.
 
-Class MonadStateLaws (A : Type) (m : Type -> Type) `{MonadState A m} :=
+Class MonadStateDec (A : Type) (m : Type -> Type) `{MonadState A m} :=
 { get_get : get >>= (fun s1 => get >>= (fun s2 => ret (s1, s2))) =
             get >>= (fun s => ret (s, s))
 ; get_put : get >>= put = ret tt
