@@ -8,6 +8,7 @@ Open Scope program_scope.
 
 (* typeclass and laws *)
 
+(** Monadic effects [m] which grant access to an inner state [A] *)
 Class MonadState (A : Type) (m : Type -> Type) `{MonadDec m} :=
 { get : m A
 ; put : A -> m unit
@@ -24,6 +25,8 @@ Class MonadStateDec (A : Type) (m : Type -> Type) `{MonadState A m} :=
 
 (* theorems *)
 
+(** Law [get_get] can be generalized, by replacing [ret] with any continuation 
+    [p]. This version turns out to be way more flexible. *)
 Lemma general_getget :
   forall {m : Type -> Type} {A : Type} `{MonadStateDec A m} 
          {X : Type} (p : A * A -> m X),
@@ -33,7 +36,7 @@ Proof.
   intros.
   destruct H2.
   destruct H4.
-  rewrite (functional_extensionality_with' (fun x1 => left_id _ _ (x1, x1) p)).
+  rewrite (fun_ext_with' (fun x1 => left_id _ _ (x1, x1) p)).
   rewrite <- (assoc _ _ _ _ _ _).
   rewrite <- get_get0.
   rewrite -> (assoc _ _ _ _ _ _).
@@ -43,6 +46,8 @@ Proof.
   now rewrite left_id.
 Qed.
 
+(** A program containing a [get] invocation whose output is being ignored, can 
+    be safely removed from the program. *)
 Lemma non_eff_get :
   forall  {m A} `{MonadStateDec A m} {X : Type} (p : m X),
     get >> p = p.

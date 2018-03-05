@@ -60,26 +60,19 @@ Proof.
   destruct H2.
   split; intros; simpl.
 
-  - rewrite (functional_extensionality_with (
-      fun s => left_id _ _ _ (fun p : A * S => runIndexedStateT (f (fst p)) (snd p)))).
+  - rewrite (fun_ext_with (
+      fun s => left_id _ _ _ (fun p => runIndexedStateT (f (fst p)) (snd p)))).
     simpl.
     repeat indexedStateT_reason.
 
   - destruct ma.
-    apply f_equal.
-    apply functional_extensionality.
-    intros.
-    assert (G : forall X Y (p : X * Y), @ret _ _ _ H1 _ (fst p, snd p) =
-                                        @ret _ _ _ H1 _ p).
-    { intros. apply f_equal. now rewrite prod_proj. }
-    rewrite (functional_extensionality_with (fun p => G _ _ p)).
+    unwrap_layer.
+    rewrite (fun_ext_with_nested' ret (fun _ => prod_proj _ _ _)).
     now rewrite right_id.
 
   - repeat indexedStateT_reason.
 
-  - apply f_equal.
-    apply functional_extensionality.
-    intros.
+  - unwrap_layer.
     now rewrite functor_rel.
 Qed.
 
@@ -94,8 +87,6 @@ Proof.
   split;
     intros;
     simpl;
-    apply f_equal;
-    apply functional_extensionality;
-    intros;
+    unwrap_layer;
     now repeat rewrite left_id.
 Qed.
