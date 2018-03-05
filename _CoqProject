@@ -1,8 +1,9 @@
 -R . Koky
 Core/Functor.v
-Core/Monad.v
-Core/MonadState.v
 Core/Id.v
 Core/indexedStateT.v
+Core/Monad.v
+Core/MonadState.v
+Core/naturalTrans.v
 Core/Std/prod.v
 Core/Util/FunExt.v

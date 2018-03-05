@@ -19,3 +19,15 @@ Class MonadDec m `{Monad m} :=
       ma >>= f >>= g = ma >>= (fun x => f x >>= g)
 ; functor_rel : forall {A B} (ma : m A) (f : A -> B), fmap f ma = ma >>= ret ∘ f
 }.
+
+(* definitions *)
+
+Require Import naturalTrans.
+
+Definition monad_morphism {f g : Type -> Type}
+                         `{Monad f, Monad g}
+                          (morph : f ~> g) : Prop :=
+  (forall X (x : X), runNaturalTrans morph (ret x) = ret x) /\
+  (forall A B (fa : f A) (f : A -> f B),
+    runNaturalTrans morph (fa >>= f) =
+    runNaturalTrans morph fa >>= (fun a => runNaturalTrans morph (f a))).

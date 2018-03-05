@@ -7,12 +7,12 @@ Arguments mkNaturalTrans [f g _ _].
 Arguments runNaturalTrans [f g _ _] _ [X].
 
 Record naturalTransDec f g `{Functor f, Functor g} (φ : f ~> g) :=
-{ naturalTrans_comm : 
+{ naturalTrans_comm :
     forall A B (fa : f A) (g : A -> B),
       runNaturalTrans φ (fmap g fa) = fmap g (runNaturalTrans φ fa)
 }.
 
-Definition composeNaturalTrans {f g h : Type -> Type} 
+Definition composeNaturalTrans {f g h : Type -> Type}
                               `{Functor f, Functor g, Functor h}
                                (nt1 : g ~> h) (nt2 : f ~> g) : f ~> h :=
   mkNaturalTrans (fun _ fx => runNaturalTrans nt1 (runNaturalTrans nt2 fx)).
