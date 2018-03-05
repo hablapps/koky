@@ -2,6 +2,8 @@ Require Import Program.Basics.
 Require Import Functor.
 Require Export Functor.
 
+(* typeclass and laws *)
+
 Class Monad m `{FunctorDec m} : Type :=
 { ret  : forall {X}, X -> m X
 ; bind : forall {A B}, m A -> (A -> m B) -> m B
