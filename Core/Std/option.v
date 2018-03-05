@@ -33,12 +33,21 @@ Qed.
 
 (* theorems *)
 
+(** If we use [option] constructor to feed [option_fold] we recover the original 
+    value *)
 Theorem option_fold_id :
-  forall A, @option_fold A _ Some None = id.
+  forall A (oa : option A), option_fold Some None oa = id oa.
 Proof.
   intros.
-  unfold option_fold.
-  apply functional_extensionality.
+  now destruct oa.
+Qed.
+
+(** A function being applied after fold is the same as composing the very same 
+    function with the original constructors and fold with them.  *)
+Theorem option_fold_f :
+  forall {A B C} (some : A -> B) (nil : B) (f : B -> C) (oa : option A),
+  @option_fold A C (fun a => f (some a)) (f nil) oa = f (option_fold some nil oa).
+Proof.
   intros.
-  now destruct x.
+  destruct oa; auto.
 Qed.

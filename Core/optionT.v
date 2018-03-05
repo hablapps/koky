@@ -19,7 +19,7 @@ Proof.
   - destruct fa.
     apply f_equal.
     unfold id.
-    rewrite option_fold_id.
+    rewrite (fun_ext_with (fun _ => option_fold_id _ _)).
     auto.
 
   - apply f_equal.
@@ -52,19 +52,25 @@ Proof.
     destruct ma.
     apply f_equal.
     simpl.
-    unfold option_fold.
-    assert (G : forall oa : option A, match oa with 
-                                      | Some a => ret (Some a) 
-                                      | None => ret None end = 
-                                      ret oa).
-    { intros. destruct oa; auto. }
-    rewrite (fun_ext_with G).
+    rewrite (fun_ext_with (fun _ => option_fold_f _ _ ret _)).
+    rewrite (fun_ext_with_nested ret (fun _ : option A => option_fold_id _ _)).
     auto.
 
   - (* assoc *)
-    admit.
+    apply f_equal.
+    unfold option_fold.
+    rewrite assoc.
+    apply f_equal.
+    apply functional_extensionality.
+    intros.
+    destruct x.
+      + unwrap_layer.
+        auto.
+      + now rewrite left_id.
 
   - (* fmap rel *)
-    admit.
-
-Admitted.
+    apply f_equal.
+    unfold Basics.compose in *.
+    rewrite (fun_ext_with (fun _ => option_fold_f _ _ ret _)).
+    auto.
+Qed.
