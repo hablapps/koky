@@ -1,5 +1,6 @@
 Require Import Program.Basics.
 Require Import Core.Monad.
+Require Import Util.FunExt.
 
 Open Scope program_scope.
 
@@ -28,4 +29,16 @@ Instance Monad_option : Monad option :=
 Instance MonadDec_option : MonadDec option.
 Proof.
   split; intros; try destruct ma; auto.
+Qed.
+
+(* theorems *)
+
+Theorem option_fold_id :
+  forall A, @option_fold A _ Some None = id.
+Proof.
+  intros.
+  unfold option_fold.
+  apply functional_extensionality.
+  intros.
+  now destruct x.
 Qed.
