@@ -1,5 +1,6 @@
 -R . Koky
 Core/affine.v
+Core/Category.v
 Core/Functor.v
 Core/Id.v
 Core/indexedStateT.v
