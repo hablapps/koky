@@ -3,6 +3,7 @@ Require Import Std.option.
 Require Import Std.sum.
 Require Import Category.
 Require Import Monad.
+Require Import Util.FunExt.
 
 Open Scope list_scope.
 
@@ -27,6 +28,58 @@ Record affineDec {S A} (af : affine S A) :=
                    sum_fold (fun _ => inl a) inr (preview af s)
 ; set_set : forall s a1 a2, set af (set af s a1) a2 = set af s a2
 }.
+
+Definition affineIdentity {S} : affine S S :=
+  mkPAffine inl (fun _ => id).
+
+Lemma affineDec_identity {S} : affineDec (@affineIdentity S).
+Proof. split; auto. Qed.
+
+Definition affineCompose {A B C} 
+                         (af1 : affine A B) (af2 : affine B C) : affine A C :=
+  mkPAffine
+    (fun s => sum_fold 
+      (fun a => sum_fold inl (fun _ => inr s) (preview af2 a)) 
+      (fun _ => inr s)
+      (preview af1 s))
+    (fun s b' => sum_fold (fun a => set af1 s (set af2 a b')) id (preview af1 s)).
+
+Lemma affineDec_compose :
+  forall A B C (af1 : affine A B) (af2 : affine B C),
+    affineDec af1 ->
+    affineDec af2 ->
+    affineDec (affineCompose af1 af2).
+Proof.
+  split; simpl; intros.
+  
+  - (* preview_set *)
+    destruct H.
+    destruct H0.
+    admit.
+
+  - (* set_preview *)
+    admit.
+
+  - (* set_set *)
+    destruct H.
+    destruct H0.
+    rewrite preview_set0.
+
+    destruct (preview af1 s).
+    simpl.
+
+    + rewrite (fun_ext_with (fun _ => set_set0 _ _ _)).
+      rewrite sum_fold_f.
+      rewrite set_preview0.
+      pose proof sum_fold_fg.
+      unfold Basics.compose in H.
+      rewrite H.
+      rewrite set_set1.
+
+    + admit.
+    admit.
+
+Admitted.
 
 Instance Category_affine : Category affine :=
 { identity _ := mkPAffine inl (fun _ => id) 
