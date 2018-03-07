@@ -47,18 +47,17 @@ Arguments mkVwbLens [S A].
 Arguments ln [S A].
 Arguments lnDec [S A].
 
-Instance Category_vwbLens : Category vwbLens :=
-{ identity _ := mkVwbLens (mkPLens id (fun _ => id)) _
-; compose _ _ _ vwbLn1 vwbLn2 := mkVwbLens (mkPLens 
-    (view (ln vwbLn2) ∘ view (ln vwbLn1))
-    (fun s => update (ln vwbLn1) s ∘ update (ln vwbLn2) (view (ln vwbLn1) s))) _
-}.
+Lemma lensDec_identity : forall A, lensDec (@identity lens _ A).
+Proof. split; auto. Qed.
+
+Lemma lensDec_compose :
+  forall {A B C} (ln1 : lens A B) (ln2 : lens B C), 
+    lensDec ln1 -> lensDec ln2 -> lensDec (compose ln1 ln2).
 Proof.
-  split; simpl; intros; auto.
-  destruct vwbLn1; destruct lnDec0.
-  destruct vwbLn2; destruct lnDec0.
-  unfold Basics.compose.
-  split; simpl; intros.
+  intros.
+  destruct H.
+  destruct H0.
+  split; simpl; unfold Basics.compose; intros.
 
   - (* view_update *)
     rewrite view_update1.
@@ -73,21 +72,6 @@ Proof.
     rewrite update_view0.
     now rewrite update_update1.
 Qed.
-
-Instance CategoryDec_vwbLens : CategoryDec vwbLens.
-Proof.
-  split; intros.
-
-  - (* left_id *)
-    admit.
-
-  - (* right_id *)
-    admit.
-
-  - (* assoc *)
-    admit.
-
-Admitted.
 
 (** Provides access to the first component of a product. *)
 Definition first {A B} : lens (A * B) A :=
