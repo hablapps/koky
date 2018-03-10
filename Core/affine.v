@@ -52,13 +52,6 @@ Definition affine'Identity {S} : affine' S S :=
 Lemma affine'Dec_identity {S} : affine'Dec (@affine'Identity S).
 Proof. split; auto. Qed.
 
-Definition affine'Compose {A B C} 
-                         (af1 : affine' A B) (af2 : affine' B C) : affine' A C :=
-  mkAffine'
-    (fun a => preview' af1 a >>= preview' af2)
-    (fun a c' => option_fold 
-      (fun b => set' af1 a (set' af2 b c')) a (preview' af1 a)).
-
 Definition affine'Compose' {A B C} 
                          (af1 : affine' A B) (af2 : affine' B C) : affine' A C :=
   mkAffine'
@@ -158,73 +151,36 @@ Proof.
     destruct (preview' af2 b); simpl; auto.
 
   - (* set'_set' *)
-    admit.
-
-Admitted.
-
-Lemma affine'Dec_compose :
-  forall A B C (af1 : affine' A B) (af2 : affine' B C),
-    affine'Dec af1 ->
-    affine'Dec af2 ->
-    affine'Dec (affine'Compose af1 af2).
-Proof.
-  intros.
-  destruct H.
-  destruct H0.
-  split; simpl; intros.
-
-  - (* preview'_set' *)
-    rewrite option_fold_bis.
-    assert (H :
-      option_fold
-        (fun y : B =>
-         option_fold
-           (fun c' : C =>
-            option_fold (fun b : B => set' af1 s (set' af2 b c')) s
-              (preview' af1 s)) s (preview' af2 y)) s 
-        (preview' af1 s) =
-      option_fold
-        (fun y : B =>
-         option_fold
-           (fun c' : C => set' af1 s (set' af2 y c')) s (preview' af2 y)) s 
-        (preview' af1 s)).
-    { destruct (preview' af1); auto. }
-    rewrite H.
-    clear H.
-    admit.
-
-  - (* set'_preview' *)
-    simpl in *.
-    unfold Basics.compose in *.
-    rewrite option_fold_bis.
     rewrite <- (option_fold_f _ _ (preview' af1) _).
-    rewrite (fun_ext_with (fun _ => set'_preview'0 _ _)).
-    destruct (preview' af1 s); simpl; auto.
-
-  - (* set'_set' *)
-    rewrite <- (option_fold_f _ _ (preview' af1) _).
-    rewrite (fun_ext_with (fun _ => set'_preview'0 _ _)).
+    rewrite <- (option_fold_f _ _ (option_fold
+      (fun b : B =>
+       set' af1
+         (option_fold
+            (fun b0 : B =>
+             set' af1 s
+               (option_fold (fun _ : C => set' af2 b0 a1) b0 (preview' af2 b0))) s
+            (preview' af1 s))
+         (option_fold (fun _ : C => set' af2 b a2) b (preview' af2 b)))
+      (option_fold
+         (fun b : B =>
+          set' af1 s (option_fold (fun _ : C => set' af2 b a1) b (preview' af2 b))) s
+         (preview' af1 s))) _).
+    rewrite (fun_ext_with_nested _ (fun _ => set'_preview'0 _ _)).
     simpl.
     unfold Basics.compose.
-    (* XXX: search for a general theorem *)
-    assert (H : option_fold
-     (fun s0 : B =>
-      option_fold (fun _ : B => Some (set' af2 s0 a1)) None (preview' af1 s))
-     (preview' af1 s) (preview' af1 s) =
-     option_fold (fun s0 : B => Some (set' af2 s0 a1)) (preview' af1 s) (preview' af1 s)).
-    { unfold option_fold.
-      destruct (preview' af1 s); auto. }
-    rewrite H.
-    destruct (preview' af1 s); simpl.
-    + rewrite set'_set'0.
-      now rewrite set'_set'1.
-    + auto.
-
-Admitted.
+    destruct (preview' af1 s); simpl; auto.
+    rewrite set'_set'0.
+    rewrite <- (option_fold_f _ _ (preview' af2) _).
+    rewrite (fun_ext_with (fun _ => set'_preview'1 _ _)).
+    simpl.
+    unfold Basics.compose.
+    destruct (preview' af2 b); simpl; auto.
+    now rewrite set'_set'1.
+Qed.
 
 (** Provides access to the head of a list. *)
 Definition head {A} : affine (list A) A :=
-  mkAffine (fun s => option_fold inl (inr nil) (hd_error s)) (fun s a' =>
+  mkPAffine (fun s => option_fold inl (inr nil) (hd_error s)) (fun s a' =>
     match s with
     | _ :: t => a' :: t
     | Nil => Nil
