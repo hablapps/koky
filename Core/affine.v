@@ -40,18 +40,23 @@ Arguments set' [S A].
 
 Record affine'Dec {S A} (af : affine' S A) :=
 { preview'_set' : forall s, option_fold (set' af s) s (preview' af s) = s
+; preview'_set'a : forall s a, 
+                     option_fold (fun _ => set' af s a) s (preview' af s) = 
+                     set' af s a
 ; set'_preview' : forall s a,
                     preview' af (set' af s a) =
                     fmap (fun _ => a) (preview' af s)
 ; set'_set' : forall s a1 a2, set' af (set' af s a1) a2 = set' af s a2
 }.
 
+(** Affine identity *)
 Definition affine'Identity {S} : affine' S S :=
   mkAffine' Some (fun _ => id).
 
 Lemma affine'Dec_identity {S} : affine'Dec (@affine'Identity S).
 Proof. split; auto. Qed.
 
+(** Affine composition *)
 Definition affine'Compose' {A B C} 
                          (af1 : affine' A B) (af2 : affine' B C) : affine' A C :=
   mkAffine'
@@ -99,6 +104,61 @@ Proof.
     unfold option_fold.
     destruct (preview' af1 s); simpl; auto.
     destruct (preview' af2 b); simpl; auto.
+
+  - (* preview'_set'a *)
+    rewrite option_fold_bis.
+    assert (H :
+      option_fold
+        (fun y : B =>
+         option_fold
+           (fun _ : C =>
+            option_fold
+              (fun b : B => set' af1 s (option_fold (fun _ : C => set' af2 b a) b (preview' af2 b)))
+              s (preview' af1 s)) s (preview' af2 y)) s (preview' af1 s) =
+      option_fold
+        (fun y : B =>
+         option_fold
+           (fun _ : C =>
+              set' af1 s (option_fold (fun _ : C => set' af2 y a) y (preview' af2 y))) s (preview' af2 y)) s (preview' af1 s)).
+    { destruct (preview' af1 s); simpl; auto. }
+    rewrite H; clear H.
+    assert (H :
+      option_fold
+        (fun y : B =>
+         option_fold
+           (fun _ : C => set' af1 s (option_fold (fun _ : C => set' af2 y a) y (preview' af2 y))) s
+           (preview' af2 y)) s (preview' af1 s) =
+      option_fold
+        (fun y : B =>
+         option_fold
+           (fun _ : C => set' af1 s (set' af2 y a)) s
+           (preview' af2 y)) s (preview' af1 s)).
+    { destruct (preview' af1 s); simpl; auto.
+      now rewrite (fun_ext_with_nested _ (fun _ => preview'_set'a1 _ _)). }
+    rewrite H; clear H.
+    rewrite (fun_ext_with' (fun _ => option_fold_f _ _ (set' af1 s) _)).
+    assert (H :
+      option_fold
+        (fun s0 : B =>
+         option_fold (fun _ : C => set' af1 s (set' af2 s0 a)) 
+           (set' af1 s s0) (preview' af2 s0)) s (preview' af1 s) =
+      option_fold
+        (fun s0 : B =>
+         option_fold (fun _ : C => set' af1 s (set' af2 s0 a)) 
+           (option_fold (set' af1 s) s (preview' af1 s)) (preview' af2 s0)) s (preview' af1 s)).
+    { destruct (preview' af1 s); simpl; auto. }
+    rewrite H; clear H.
+    assert (H :
+      (fun s0 : B =>
+         option_fold (fun _ : C => set' af1 s (set' af2 s0 a))
+           (option_fold (set' af1 s) s (preview' af1 s)) 
+           (preview' af2 s0)) =
+      (fun s0 : B =>
+         option_fold (fun _ : C => set' af1 s (set' af2 s0 a))
+           s (preview' af2 s0))).
+    { extensionality s0.
+      now rewrite preview'_set'0. }
+    now rewrite H; clear H.
 
   - (* set'_preview' *)
     simpl in *.
@@ -176,6 +236,41 @@ Proof.
     unfold Basics.compose.
     destruct (preview' af2 b); simpl; auto.
     now rewrite set'_set'1.
+Qed.
+
+(** Left identity *)
+Lemma affine'_left_identity :
+  forall A B (af : affine' A B), 
+    affine'Dec af -> affine'Compose' affine'Identity af = af.
+Proof.
+  intros.
+  unfold affine'Compose'.
+  unfold affine'Identity.
+  destruct H.
+  destruct af.
+  apply f_equal.
+  extensionality a.
+  extensionality c'.
+  simpl.
+  now rewrite preview'_set'a0.
+Qed.
+
+(** Righ identity *)
+Lemma affine'_right_identity :
+  forall A B (af : affine' A B), 
+    affine'Dec af -> affine'Compose' af affine'Identity = af.
+Proof.
+  intros.
+  unfold affine'Compose'.
+  unfold affine'Identity.
+  destruct H.
+  destruct af.
+  simpl.
+  rewrite (fun_ext_with (fun _ => option_fold_id _ _)).
+  apply f_equal.
+  extensionality a.
+  extensionality c'.
+  now rewrite preview'_set'a0.
 Qed.
 
 (** Provides access to the head of a list. *)
