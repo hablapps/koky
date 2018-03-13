@@ -20,6 +20,7 @@ Arguments update [S T A B].
 (** Monomorphic lens *)
 Definition lens S A : Type := pLens S S A A.
 
+(** Very well-behaved lens. *)
 Record lensDec {S A} (ln : lens S A) := mkLensDec
 { view_update : forall s, update ln s (view ln s) = s
 ; update_view : forall s a, view ln (update ln s a) = a
@@ -37,15 +38,6 @@ Instance CategoryDec_lens : CategoryDec lens.
 Proof.
   split; simpl; intros; destruct cab; auto.
 Qed.
-
-(** Very well behaved lens: lens and laws packed together. *)
-Record vwbLens S A := mkVwbLens
-{ ln : lens S A
-; lnDec : lensDec ln
-}.
-Arguments mkVwbLens [S A].
-Arguments ln [S A].
-Arguments lnDec [S A].
 
 Lemma lensDec_identity : forall A, lensDec (@identity lens _ A).
 Proof. split; auto. Qed.

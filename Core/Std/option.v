@@ -51,3 +51,21 @@ Proof.
   intros.
   destruct oa; auto.
 Qed.
+
+Theorem option_fold_fg :
+  forall A A1 C
+        (some1 : A -> A1) (some2 : A1 -> C) (nil2 : C) (x : option A),
+    option_fold some2 nil2 (option_fold (Some ∘ some1) None x) = 
+    option_fold (some2 ∘ some1) nil2 x.
+Proof.
+  intros.
+  destruct x; auto.
+Qed.
+
+Theorem option_fold_bis :
+  forall A B C (f : A -> option B) (g : B -> C) (v : C) (x : option A),
+    option_fold g v (option_fold f None x) =
+    option_fold (fun y => option_fold g v (f y)) v x.
+Proof.
+  destruct x; auto.
+Qed.
