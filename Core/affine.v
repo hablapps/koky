@@ -57,20 +57,19 @@ Lemma affine'Dec_identity {S} : affine'Dec (@affine'Identity S).
 Proof. split; auto. Qed.
 
 (** Affine composition *)
-Definition affine'Compose' {A B C} 
-                         (af1 : affine' A B) (af2 : affine' B C) : affine' A C :=
+Definition affine'Compose {A B C} 
+                          (af1 : affine' A B) 
+                          (af2 : affine' B C) : affine' A C :=
   mkAffine'
     (fun a => preview' af1 a >>= preview' af2)
     (fun a c' => option_fold 
-      (fun b => set' af1 a (option_fold 
-        (fun _ => set' af2 b c') b (preview' af2 b))) 
-      a (preview' af1 a)).
+      (fun b => set' af1 a (set' af2 b c')) a (preview' af1 a)).
 
-Lemma affine'Dec_compose' :
+Lemma affine'Dec_compose :
   forall A B C (af1 : affine' A B) (af2 : affine' B C),
     affine'Dec af1 ->
     affine'Dec af2 ->
-    affine'Dec (affine'Compose' af1 af2).
+    affine'Dec (affine'Compose af1 af2).
 Proof.
   intros.
   destruct H.
@@ -84,24 +83,62 @@ Proof.
         (fun y : B =>
          option_fold
            (fun c' : C =>
+            option_fold (fun b : B => set' af1 s (set' af2 b c')) s (preview' af1 s)) s
+           (preview' af2 y)) s (preview' af1 s) =
+      option_fold
+        (fun y : B =>
+         option_fold
+           (fun c' : C =>
+            option_fold (fun b : B => set' af1 s (option_fold (fun _ : C => set' af2 b c') b (preview' af2 b))) s (preview' af1 s)) s
+           (preview' af2 y)) s (preview' af1 s)).
+    { destruct (preview' af1 s); simpl; auto.
+      destruct (preview' af2 b); simpl; auto.
+    }
+    rewrite H; clear H.
+    assert (H :
+      option_fold
+        (fun y : B =>
+         option_fold
+           (fun c' : C =>
             option_fold
-              (fun b : B => set' af1 s (option_fold (fun _ : C => set' af2 b c') b (preview' af2 b))) s
+              (fun b : B =>
+               set' af1 s
+                 (option_fold (fun _ : C => set' af2 b c') b (preview' af2 b))) s
               (preview' af1 s)) s (preview' af2 y)) s (preview' af1 s) =
       option_fold
         (fun y : B =>
          option_fold
            (fun c' : C =>
             option_fold
-              (fun b : B => set' af1 s (option_fold (set' af2 b) b (preview' af2 b))) s
+              (fun b : B =>
+               set' af1 s
+                 (option_fold (fun c' : C => set' af2 b c') b (preview' af2 b))) s
               (preview' af1 s)) s (preview' af2 y)) s (preview' af1 s)).
     { destruct (preview' af1 s); simpl; auto.
       destruct (preview' af2 b); simpl; auto.
     }
-    rewrite H.
-    clear H.
-    rewrite (fun_ext_with_nested (set' af1 s) (fun _ => preview'_set'1 _)).
+    rewrite H; clear H.
+    assert (H :
+      option_fold
+        (fun y : B =>
+         option_fold
+           (fun _ : C =>
+            option_fold
+              (fun b : B =>
+               set' af1 s (option_fold (fun c'0 : C => set' af2 b c'0) b (preview' af2 b))) s
+              (preview' af1 s)) s (preview' af2 y)) s (preview' af1 s) =
+      option_fold
+        (fun y : B =>
+         option_fold
+           (fun _ : C =>
+            option_fold
+              (fun b : B => set' af1 s b) s (preview' af1 s)) 
+              s (preview' af2 y)) s (preview' af1 s)).
+    { destruct (preview' af1 s); simpl; auto.
+      now rewrite (fun_ext_with_nested _ (fun _ => preview'_set'1 _)). 
+    }
+    rewrite H; clear H.
     rewrite (fun_ext_with (fun _ => preview'_set'0 _)).
-    unfold option_fold.
     destruct (preview' af1 s); simpl; auto.
     destruct (preview' af2 b); simpl; auto.
 
@@ -112,30 +149,16 @@ Proof.
         (fun y : B =>
          option_fold
            (fun _ : C =>
-            option_fold
-              (fun b : B => set' af1 s (option_fold (fun _ : C => set' af2 b a) b (preview' af2 b)))
-              s (preview' af1 s)) s (preview' af2 y)) s (preview' af1 s) =
-      option_fold
-        (fun y : B =>
-         option_fold
-           (fun _ : C =>
-              set' af1 s (option_fold (fun _ : C => set' af2 y a) y (preview' af2 y))) s (preview' af2 y)) s (preview' af1 s)).
-    { destruct (preview' af1 s); simpl; auto. }
-    rewrite H; clear H.
-    assert (H :
-      option_fold
-        (fun y : B =>
-         option_fold
-           (fun _ : C => set' af1 s (option_fold (fun _ : C => set' af2 y a) y (preview' af2 y))) s
+            option_fold (fun b : B => set' af1 s (set' af2 b a)) s (preview' af1 s)) s
            (preview' af2 y)) s (preview' af1 s) =
       option_fold
         (fun y : B =>
          option_fold
-           (fun _ : C => set' af1 s (set' af2 y a)) s
-           (preview' af2 y)) s (preview' af1 s)).
-    { destruct (preview' af1 s); simpl; auto.
-      now rewrite (fun_ext_with_nested _ (fun _ => preview'_set'a1 _ _)). }
+           (fun _ : C => set' af1 s (set' af2 y a)) s (preview' af2 y)) 
+        s (preview' af1 s)).
+    { destruct (preview' af1 s); simpl; auto. }
     rewrite H; clear H.
+    rewrite (fun_ext_with_nested' _ (fun _ => preview'_set'a1 _ _)).
     rewrite (fun_ext_with' (fun _ => option_fold_f _ _ (set' af1 s) _)).
     assert (H :
       option_fold
@@ -171,11 +194,11 @@ Proof.
            (fun s0 : B =>
             option_fold
               (fun _ : B =>
-               Some (option_fold (fun _ : C => set' af2 s0 a) s0 (preview' af2 s0)))
+               Some (set' af2 s0 a))
               None (preview' af1 s)) (preview' af1 s) (preview' af1 s)) =
       option_fold (preview' af2) None
         (option_fold
-           (fun s0 : B => Some (option_fold (fun _ : C => set' af2 s0 a) s0 (preview' af2 s0))) 
+           (fun s0 : B => Some (set' af2 s0 a)) 
            None 
           (preview' af1 s))).
     { destruct (preview' af1 s); simpl; auto. }
@@ -185,83 +208,54 @@ Proof.
       option_fold
         (fun a0 : B =>
          option_fold (preview' af2) None
-           (Some (option_fold (fun _ : C => set' af2 a0 a) a0 (preview' af2 a0))))
+           (Some (set' af2 a0 a)))
         (option_fold (preview' af2) None None) (preview' af1 s) =
       option_fold
-        (fun a0 : B => 
-           preview' af2 (option_fold (fun _ : C => set' af2 a0 a) a0 (preview' af2 a0)))
+        (fun a0 : B => preview' af2 (set' af2 a0 a))
         None
         (preview' af1 s)).
     { destruct (preview' af1 s); simpl; auto. }
     rewrite H; clear H.
-    rewrite (fun_ext_with' (fun _ => option_fold_f _ _ (preview' af2) _)).
-    assert (H :
-      option_fold
-        (fun s0 : B =>
-         option_fold (fun _ : C => preview' af2 (set' af2 s0 a)) 
-           (preview' af2 s0) (preview' af2 s0)) None (preview' af1 s) =
-      option_fold
-        (fun s0 : B =>
-         option_fold (fun _ : C => option_fold (fun _ : C => Some a) None (preview' af2 s0)) 
-           (preview' af2 s0) (preview' af2 s0)) None (preview' af1 s)).
-    { destruct (preview' af1 s); simpl; auto.
-      now rewrite (fun_ext_with (fun _ => set'_preview'1 _ _)). }
-    rewrite H; clear H.
+    rewrite (fun_ext_with (fun _ => set'_preview'1 _ _)).
     destruct (preview' af1 s); simpl; auto.
-    destruct (preview' af2 b); simpl; auto.
 
   - (* set'_set' *)
     rewrite <- (option_fold_f _ _ (preview' af1) _).
     rewrite <- (option_fold_f _ _ (option_fold
       (fun b : B =>
-       set' af1
-         (option_fold
-            (fun b0 : B =>
-             set' af1 s
-               (option_fold (fun _ : C => set' af2 b0 a1) b0 (preview' af2 b0))) s
-            (preview' af1 s))
-         (option_fold (fun _ : C => set' af2 b a2) b (preview' af2 b)))
-      (option_fold
-         (fun b : B =>
-          set' af1 s (option_fold (fun _ : C => set' af2 b a1) b (preview' af2 b))) s
-         (preview' af1 s))) _).
+       set' af1 (option_fold (fun b0 : B => set' af1 s (set' af2 b0 a1)) s (preview' af1 s))
+         (set' af2 b a2))
+      (option_fold (fun b : B => set' af1 s (set' af2 b a1)) s (preview' af1 s))) _).
     rewrite (fun_ext_with_nested _ (fun _ => set'_preview'0 _ _)).
     simpl.
     unfold Basics.compose.
     destruct (preview' af1 s); simpl; auto.
     rewrite set'_set'0.
-    rewrite <- (option_fold_f _ _ (preview' af2) _).
-    rewrite (fun_ext_with (fun _ => set'_preview'1 _ _)).
-    simpl.
-    unfold Basics.compose.
-    destruct (preview' af2 b); simpl; auto.
     now rewrite set'_set'1.
 Qed.
 
 (** Left identity *)
 Lemma affine'_left_identity :
   forall A B (af : affine' A B), 
-    affine'Dec af -> affine'Compose' affine'Identity af = af.
+    affine'Dec af -> affine'Compose affine'Identity af = af.
 Proof.
   intros.
-  unfold affine'Compose'.
+  unfold affine'Compose.
   unfold affine'Identity.
   destruct H.
   destruct af.
   apply f_equal.
   extensionality a.
-  extensionality c'.
-  simpl.
-  now rewrite preview'_set'a0.
+  now extensionality c'.
 Qed.
 
 (** Righ identity *)
 Lemma affine'_right_identity :
   forall A B (af : affine' A B), 
-    affine'Dec af -> affine'Compose' af affine'Identity = af.
+    affine'Dec af -> affine'Compose af affine'Identity = af.
 Proof.
   intros.
-  unfold affine'Compose'.
+  unfold affine'Compose.
   unfold affine'Identity.
   destruct H.
   destruct af.
