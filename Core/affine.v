@@ -78,22 +78,18 @@ Proof.
 
   - (* preview'_set' *)
     rewrite option_fold_bis.
-    assert (H :
-      option_fold
-        (fun y : B =>
-         option_fold
-           (fun c' : C =>
-            option_fold (fun b : B => set' af1 s (set' af2 b c')) s (preview' af1 s)) s
-           (preview' af2 y)) s (preview' af1 s) =
-      option_fold
-        (fun y : B =>
-         option_fold
-           (fun c' : C =>
-            option_fold (fun b : B => set' af1 s (option_fold (fun _ : C => set' af2 b c') b (preview' af2 b))) s (preview' af1 s)) s
-           (preview' af2 y)) s (preview' af1 s)).
-    { destruct (preview' af1 s); simpl; auto.
-      destruct (preview' af2 b); simpl; auto.
-    }
+    assert (H : 
+      (fun c' : C => option_fold (
+        fun b : B => set' af1 s (set' af2 b c')) 
+        s (preview' af1 s)) =
+      (fun c' : C => option_fold (
+        fun b : B => set' af1 s (option_fold (
+          fun _ : C => set' af2 b c') 
+          b (preview' af2 b))) 
+        s (preview' af1 s))).
+    { extensionality c'.
+      destruct (preview' af1 s); simpl; auto.
+      now rewrite preview'_set'a1. }
     rewrite H; clear H.
     assert (H :
       option_fold
@@ -119,23 +115,13 @@ Proof.
     }
     rewrite H; clear H.
     assert (H :
-      option_fold
-        (fun y : B =>
-         option_fold
-           (fun _ : C =>
-            option_fold
-              (fun b : B =>
-               set' af1 s (option_fold (fun c'0 : C => set' af2 b c'0) b (preview' af2 b))) s
-              (preview' af1 s)) s (preview' af2 y)) s (preview' af1 s) =
-      option_fold
-        (fun y : B =>
-         option_fold
-           (fun _ : C =>
-            option_fold
-              (fun b : B => set' af1 s b) s (preview' af1 s)) 
-              s (preview' af2 y)) s (preview' af1 s)).
-    { destruct (preview' af1 s); simpl; auto.
-      now rewrite (fun_ext_with_nested _ (fun _ => preview'_set'1 _)). 
+      (fun b : B =>
+        set' af1 s (option_fold (
+          fun c'0 : C => set' af2 b c'0) 
+          b (preview' af2 b))) =
+      (fun b : B => set' af1 s b)).
+    { extensionality b.
+      now rewrite preview'_set'1.
     }
     rewrite H; clear H.
     rewrite (fun_ext_with (fun _ => preview'_set'0 _)).
@@ -162,13 +148,18 @@ Proof.
     rewrite (fun_ext_with' (fun _ => option_fold_f _ _ (set' af1 s) _)).
     assert (H :
       option_fold
-        (fun s0 : B =>
-         option_fold (fun _ : C => set' af1 s (set' af2 s0 a)) 
-           (set' af1 s s0) (preview' af2 s0)) s (preview' af1 s) =
+        (fun s0 : B => option_fold 
+          (fun _ : C => set' af1 s (set' af2 s0 a)) 
+          (set' af1 s s0) 
+          (preview' af2 s0)) 
+        s (preview' af1 s) =
       option_fold
         (fun s0 : B =>
-         option_fold (fun _ : C => set' af1 s (set' af2 s0 a)) 
-           (option_fold (set' af1 s) s (preview' af1 s)) (preview' af2 s0)) s (preview' af1 s)).
+          option_fold 
+            (fun _ : C => set' af1 s (set' af2 s0 a)) 
+            (option_fold (set' af1 s) s (preview' af1 s)) 
+            (preview' af2 s0)) 
+        s (preview' af1 s)).
     { destruct (preview' af1 s); simpl; auto. }
     rewrite H; clear H.
     assert (H :
