@@ -69,3 +69,11 @@ Theorem option_fold_bis :
 Proof.
   destruct x; auto.
 Qed.
+
+Theorem option_fold_nested :
+  forall A B (f : A -> B) (v w : B) (oa : option A),
+    option_fold (fun a => option_fold f w oa) v oa = 
+    option_fold f v oa.
+Proof.
+  destruct oa; auto.
+Qed.

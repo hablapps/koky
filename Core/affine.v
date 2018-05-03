@@ -7,7 +7,7 @@ Require Import Util.FunExt.
 
 Open Scope list_scope.
 
-(** Affine traversal (aka. optional) gets an optional part [A] from the whole 
+(** Affine traversal (aka. optional) gets an optional part [A] from the whole
     [S] and updates the current part with a new version of it [B], to produce
     a new version of the whole [T]. *)
 Record pAffine (S T A B : Type) := mkPAffine
@@ -23,8 +23,8 @@ Definition affine S A : Type := pAffine S S A A.
 
 Record affineDec {S A} (af : affine S A) :=
 { preview_set : forall s, sum_fold (set af s) id (preview af s) = s
-; set_preview : forall s a, 
-                   preview af (set af s a) = 
+; set_preview : forall s a,
+                   preview af (set af s a) =
                    sum_fold (fun _ => inl a) inr (preview af s)
 ; set_set : forall s a1 a2, set af (set af s a1) a2 = set af s a2
 }.
@@ -40,8 +40,8 @@ Arguments set' [S A].
 
 Record affine'Dec {S A} (af : affine' S A) :=
 { preview'_set' : forall s, option_fold (set' af s) s (preview' af s) = s
-; preview'_set'a : forall s a, 
-                     option_fold (fun _ => set' af s a) s (preview' af s) = 
+; preview'_set'a : forall s a,
+                     option_fold (fun _ => set' af s a) s (preview' af s) =
                      set' af s a
 ; set'_preview' : forall s a,
                     preview' af (set' af s a) =
@@ -57,12 +57,12 @@ Lemma affine'Dec_identity {S} : affine'Dec (@affine'Identity S).
 Proof. split; auto. Qed.
 
 (** Affine composition *)
-Definition affine'Compose {A B C} 
-                          (af1 : affine' A B) 
+Definition affine'Compose {A B C}
+                          (af1 : affine' A B)
                           (af2 : affine' B C) : affine' A C :=
   mkAffine'
     (fun a => preview' af1 a >>= preview' af2)
-    (fun a c' => option_fold 
+    (fun a c' => option_fold
       (fun b => set' af1 a (set' af2 b c')) a (preview' af1 a)).
 
 Require Import Coq.Logic.FunctionalExtensionality.
@@ -142,7 +142,7 @@ Proof.
       option_fold
         (fun y : B =>
          option_fold
-           (fun _ : C => set' af1 s (set' af2 y a)) s (preview' af2 y)) 
+           (fun _ : C => set' af1 s (set' af2 y a)) s (preview' af2 y))
         s (preview' af1 s)).
     { destruct (preview' af1 s); simpl; auto. }
     rewrite H; clear H.
@@ -150,13 +150,18 @@ Proof.
     setoid_rewrite <- (option_fold_f _ _ (set' af1 s)).
     assert (H :
       option_fold
-        (fun s0 : B =>
-         option_fold (fun _ : C => set' af1 s (set' af2 s0 a)) 
-           (set' af1 s s0) (preview' af2 s0)) s (preview' af1 s) =
+        (fun s0 : B => option_fold
+          (fun _ : C => set' af1 s (set' af2 s0 a))
+          (set' af1 s s0)
+          (preview' af2 s0))
+        s (preview' af1 s) =
       option_fold
         (fun s0 : B =>
-         option_fold (fun _ : C => set' af1 s (set' af2 s0 a)) 
-           (option_fold (set' af1 s) s (preview' af1 s)) (preview' af2 s0)) s (preview' af1 s)).
+          option_fold
+            (fun _ : C => set' af1 s (set' af2 s0 a))
+            (option_fold (set' af1 s) s (preview' af1 s))
+            (preview' af2 s0))
+        s (preview' af1 s)).
     { destruct (preview' af1 s); simpl; auto. }
     rewrite H; clear H.
     now setoid_rewrite preview'_set'0.
@@ -176,8 +181,8 @@ Proof.
               None (preview' af1 s)) (preview' af1 s) (preview' af1 s)) =
       option_fold (preview' af2) None
         (option_fold
-           (fun s0 : B => Some (set' af2 s0 a)) 
-           None 
+           (fun s0 : B => Some (set' af2 s0 a))
+           None
           (preview' af1 s))).
     { destruct (preview' af1 s); simpl; auto. }
     rewrite H; clear H.
@@ -203,7 +208,7 @@ Qed.
 
 (** Left identity *)
 Lemma affine'_left_identity :
-  forall A B (af : affine' A B), 
+  forall A B (af : affine' A B),
     affine'Dec af -> affine'Compose affine'Identity af = af.
 Proof.
   intros.
@@ -218,7 +223,7 @@ Qed.
 
 (** Righ identity *)
 Lemma affine'_right_identity :
-  forall A B (af : affine' A B), 
+  forall A B (af : affine' A B),
     affine'Dec af -> affine'Compose af affine'Identity = af.
 Proof.
   intros.
@@ -261,10 +266,10 @@ Proof.
       (fun b : C =>
        option_fold (fun b0 : B => set' af1 a (set' af2 b0 (set' af3 b c'))) a
          (preview' af1 a)) a (option_fold (preview' af2) None (preview' af1 a)) =
-    option_fold 
-      (fun b => option_fold 
-                  (fun c => set' af1 a (set' af2 b (set' af3 c c'))) 
-                  a (preview' af2 b)) 
+    option_fold
+      (fun b => option_fold
+                  (fun c => set' af1 a (set' af2 b (set' af3 c c')))
+                  a (preview' af2 b))
       a (preview' af1 a)).
   { destruct (preview' af1 a); simpl; auto. }
   rewrite G; clear G.
@@ -273,11 +278,11 @@ Proof.
   assert (G :
     option_fold
       (fun s : B =>
-       option_fold (fun a0 : C => set' af1 a (set' af2 s (set' af3 a0 c'))) 
+       option_fold (fun a0 : C => set' af1 a (set' af2 s (set' af3 a0 c')))
          (set' af1 a s) (preview' af2 s)) a (preview' af1 a) =
     option_fold
       (fun s : B =>
-       option_fold (fun a0 : C => set' af1 a (set' af2 s (set' af3 a0 c'))) 
+       option_fold (fun a0 : C => set' af1 a (set' af2 s (set' af3 a0 c')))
          (option_fold (set' af1 a) a (preview' af1 a)) (preview' af2 s)) a (preview' af1 a)).
   { destruct (preview' af1 a); simpl; auto. }
   rewrite G; clear G.
