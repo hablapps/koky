@@ -1,5 +1,6 @@
 -R . Koky
 Core/affine.v
+Core/affineAlg.v
 Core/Category.v
 Core/Functor.v
 Core/Id.v
@@ -9,6 +10,7 @@ Core/Monad.v
 Core/MonadState.v
 Core/naturalTrans.v
 Core/Std/option.v
+Core/Std/optionT.v
 Core/Std/prod.v
 Core/Std/sum.v
 Core/Util/FunExt.v

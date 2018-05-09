@@ -12,6 +12,8 @@ Record indexedStateT S1 S2 (m : Type -> Type) `{Monad m} Out := mkIndexedStateT
 }.
 Arguments mkIndexedStateT [S1 S2 m _ _ _ Out].
 Arguments runIndexedStateT [S1 S2 m _ _ _ Out].
+Arguments execIndexedStateT [S1 S2 m _ _ _ Out].
+Arguments evalIndexedStateT [S1 S2 m _ _ _ Out].
 
 Definition indexedState S1 S2 Out := indexedStateT S1 S2 Id Out.
 Definition stateT S m `{Monad m} Out := indexedStateT S S m Out.
