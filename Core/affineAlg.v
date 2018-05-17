@@ -109,6 +109,19 @@ Property join_dist_over_compose :
     h ∘ (f ▽ g) = (h ∘ f) ▽ (h ∘ g).
 Proof. intros. apply functional_extensionality. intros. now destruct x. Qed.
 
+Property prod_after_fork :
+  forall A B C D E (f : B -> C) (g : D -> E) (h : A -> B) (k : A -> D),
+    (f * g) ∘ (h △ k) = (f ∘ h) △ (g ∘ k).
+Proof. auto. Qed.
+
+Property fst_after_fork :
+  forall A B C (f : A -> B) (g : A -> C), fst ∘ (f △ g) = f.
+Proof. auto. Qed.
+
+Property snd_after_fork :
+  forall A B C (f : A -> B) (g : A -> C), snd ∘ (f △ g) = g.
+Proof. auto. Qed.
+
 
 (* state monad *)
 
@@ -218,6 +231,45 @@ Definition affineCompose {A B C} (af1 : affine A B) (af2 : affine B C) : affine 
 {| preview := (id + id ▽ id) ∘ sum_assocl ∘ (preview af2 + id) ∘ preview af1
 ;  set := (set af1 ▽ fst) ∘ distl ∘ (id * ((set af2 + fst) ∘ distr)) ∘ (fst △ (preview af1 * id))
 |}.
+
+Theorem affine_closed_under_compose :
+  forall A B C (af1 : affine A B) (af2 : affine B C),
+    affineDec af1 -> affineDec af2 -> affineDec (affineCompose af1 af2).
+Proof.
+  intros.
+  unfold affineCompose.
+  destruct H, H0.
+  constructor; simpl.
+  - admit.
+  - admit.
+  - repeat rewrite <- fun_assoc.
+    rewrite prod_after_fork.
+    repeat rewrite fun_assoc.
+    rewrite left_id.
+    rewrite join_dist_over_compose.
+    repeat rewrite <- fun_assoc.
+    rewrite set_preview0.
+    repeat rewrite fun_assoc.
+    (* XXX: replace repeat fun_assoc with the following pattern *)
+    rewrite <- (fun_assoc _ _ _ _ (snd + fst) (preview af2 + id) ((id + id ▽ id) ∘ sum_assocl)).
+    rewrite sum_after_sum.
+    rewrite left_id.
+
+    apply functional_extensionality; intros; destruct x.
+    unfold fork at 1.
+    unfold Basics.compose at 1.
+    unfold Basics.compose at 11.
+    unfold fprod at 2.
+    simpl.
+    unfold Basics.compose at 12.
+    unfold fprod at 2.
+    unfold Basics.compose at 12.
+    simpl.
+    unfold Basics.compose at 12.
+    destruct (preview af1 a); simpl; admit.
+
+  - admit.
+Admitted.
 
 
 (* natural affine *)
