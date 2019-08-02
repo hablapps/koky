@@ -12,3 +12,4 @@ Core/Std/option.v
 Core/Std/prod.v
 Core/Std/sum.v
 Core/Util/FunExt.v
+Example/mlens.v
