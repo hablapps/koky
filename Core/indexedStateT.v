@@ -32,7 +32,7 @@ Ltac indexedStateT_reason :=
   end; simpl; auto.
 
 Instance Functor_stateT {S m} `{Monad m} : Functor (stateT S m) :=
-{ fmap _ _ f sa := mkIndexedStateT (fun s =>
+{ fmap A B f sa := mkIndexedStateT (fun s =>
     fmap (fmap f) (runIndexedStateT sa s)) }.
 
 Instance FunctorDec_stateT {S m} `{Monad m} : FunctorDec (stateT S m).
@@ -48,8 +48,8 @@ Proof.
 Qed.
 
 Instance Monad_stateT {S m} `{Monad m} : Monad (stateT S m) :=
-{ ret _ x := mkIndexedStateT (fun s => ret (x, s))
-; bind _ _ sa f := mkIndexedStateT (fun s =>
+{ ret A x := mkIndexedStateT (fun s => ret (x, s))
+; bind A B sa f := mkIndexedStateT (fun s =>
     runIndexedStateT sa s >>= (fun p => runIndexedStateT (f (fst p)) (snd p)))
 }.
 

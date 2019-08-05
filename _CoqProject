@@ -8,8 +8,11 @@ Core/lens.v
 Core/Monad.v
 Core/MonadState.v
 Core/naturalTrans.v
+Core/Profunctor.v
+Core/Std/fun.v
 Core/Std/option.v
 Core/Std/prod.v
 Core/Std/sum.v
 Core/Util/FunExt.v
 Example/mlens.v
+Example/plens.v
