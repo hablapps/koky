@@ -2,7 +2,7 @@ Require Import Koky.Core.Util.FunExt.
 Require Import Functor.
 
 Instance Functor_prod {A} : Functor (prod A) :=
-{ fmap _ _ f pair := (fst pair, f (snd pair)) }.
+{ fmap A B f pair := (fst pair, f (snd pair)) }.
 
 Instance FunctorDec_prod {A} : FunctorDec (prod A).
 Proof.
@@ -10,7 +10,7 @@ Proof.
 Qed.
 
 Instance Functor_prod' {B} : Functor (fun A => prod A B) :=
-{ fmap _ _ f pair := (f (fst pair), (snd pair)) }.
+{ fmap A B f pair := (f (fst pair), (snd pair)) }.
 
 Instance FunctorDec_prod' {B} : FunctorDec (fun A => prod A B).
 Proof.

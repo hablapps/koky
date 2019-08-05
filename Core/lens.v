@@ -28,8 +28,8 @@ Record lensDec {S A} (ln : lens S A) := mkLensDec
 }.
 
 Instance Category_lens : Category lens :=
-{ identity _ := mkPLens id (fun _ => id) 
-; compose _ _ _ ln1 ln2 := mkPLens 
+{ identity A := mkPLens id (fun _ => id) 
+; compose A B C ln1 ln2 := mkPLens 
     (view ln2 ∘ view ln1)
     (fun s => update ln1 s ∘ update ln2 (view ln1 s))
 }.
@@ -82,6 +82,14 @@ Definition secondDec {A B} : lensDec (@second A B).
 Proof.
   split; simpl; auto.
 Qed.
+
+(** Profunctor lens *)
+
+Require Import Profunctor.
+
+Definition LensP (S T A B : Type) : Type := forall p `{Cartesian p}, p A B -> p S T.
+
+Definition LensP' (S A : Type) : Type := LensP S S A A.
 
 (** Monadic lens *)
 

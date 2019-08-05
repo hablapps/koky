@@ -14,7 +14,7 @@ Definition option_fold {A B} (some : A -> B) (none : B) (oa : option A) : B :=
 (* typeclass instances *)
 
 Instance Functor_option : Functor option :=
-{ fmap _ _ f := option_fold (Some ∘ f) None }.
+{ fmap A B f := option_fold (Some ∘ f) None }.
 
 Instance FunctorDec_option : FunctorDec option.
 Proof.
@@ -22,8 +22,8 @@ Proof.
 Qed.
 
 Instance Monad_option : Monad option :=
-{ ret _ := Some
-; bind _ _ ox f := option_fold f None ox
+{ ret A := Some
+; bind A B ox f := option_fold f None ox
 }.
 
 Instance MonadDec_option : MonadDec option.
